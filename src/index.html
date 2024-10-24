@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gráfico de Umidade do Solo</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <canvas id="moistureChart" width="400" height="200"></canvas>
+  <script>
+    async function fetchMoistureData() {
+      const { createClient } = supabase;
+      const supabaseUrl = 'https://bkuzekhoffvnuroeqpii.supabase.co';
+      const supabaseKey = ' eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdXpla2hvZmZ2bnVyb2VxcGlpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyOTcyNjY0OCwiZXhwIjoyMDQ1MzAyNjQ4fQ.Atyv-69rCn6LWi9UbFvTYzUiQ3DvHAU-GsKVluBLoWw';
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      let { data, error } = await supabase
+        .from('soil_moisture')
+        .select('*');
+
+      if (error) console.error(error);
+      return data;
+    }
+
+    async function createChart() {
+      const moistureData = await fetchMoistureData();
+      const labels = moistureData.map(item => item.timestamp);
+      const values = moistureData.map(item => item.moisture_value);
+
+      const ctx = document.getElementById('moistureChart').getContext('2d');
+      const myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Umidade do Solo',
+            data: values,
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }]
+        }
+      });
+    }
+
+    createChart();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</body>
+</html>
